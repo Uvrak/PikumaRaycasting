@@ -94,10 +94,10 @@ void renderMap() {
 
 			SDL_SetRenderDrawColor(renderer, tileColor, tileColor, tileColor, 255);
 			SDL_Rect mapTileRect = {
-				tileX,
-				tileY,
-				TILE_SIZE,
-				TILE_SIZE
+				(int)(tileX * MINIMAP_SCALE_FACTOR),
+				(int)(tileY * MINIMAP_SCALE_FACTOR),
+				(int)(TILE_SIZE * MINIMAP_SCALE_FACTOR),
+				(int)(TILE_SIZE * MINIMAP_SCALE_FACTOR)
 			};
 			SDL_RenderFillRect(renderer, &mapTileRect);
 		}
