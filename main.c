@@ -6,7 +6,7 @@ SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL; 
 
 int isGameRunning = FALSE;
-int playerX, playerY;
+
 int ticksLastFrame;
 
 int initializeWindow() {
@@ -47,8 +47,6 @@ void destroyWindow() {
 void setup() {
 	// TODO:
 	// initialize and setup game objects
-	playerX = 0;
-	playerY = 0;
 }
 
 void processInput() {
@@ -73,8 +71,8 @@ void update() {
 	while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksLastFrame + FRAME_TIME_LENGTH));
 	float perSecond = (SDL_GetTicks() - ticksLastFrame) / 1000.0f;
 	ticksLastFrame = SDL_GetTicks();
-	playerX += 50 * perSecond;
-	playerY += 50 * perSecond;
+	
+	//TODO: remember to update game objject as a function of perSecond
 }
 void render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -82,14 +80,7 @@ void render() {
 
 	// TODO:
 	// render all game objects for the current frame
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-	SDL_Rect rect = {
-		playerX,
-		playerY,
-		20,
-		20
-	};
-	SDL_RenderFillRect(renderer, &rect);
+	
 
 	SDL_RenderPresent(renderer);
 }
