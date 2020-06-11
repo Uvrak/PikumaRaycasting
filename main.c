@@ -85,6 +85,23 @@ void setup() {
 	player.walkSpeed = 100;
 	player.turnSpeed = 45 * (PI / 180);
 }
+void renderPlayer() {
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_Rect playerRect = {
+		(int)(player.x * MINIMAP_SCALE_FACTOR),
+		(int)(player.y * MINIMAP_SCALE_FACTOR),
+		(int)(player.width * MINIMAP_SCALE_FACTOR),
+		(int)(player.height * MINIMAP_SCALE_FACTOR)
+	};
+	SDL_RenderFillRect(renderer, &playerRect);
+	SDL_RenderDrawLine(
+		renderer,
+		(int)(MINIMAP_SCALE_FACTOR * player.x),
+		(int)(MINIMAP_SCALE_FACTOR * player.y),
+		(int)(MINIMAP_SCALE_FACTOR * player.x + cos(player.rotationAngle) * 40),
+		(int)(MINIMAP_SCALE_FACTOR * player.y + sin(player.rotationAngle) * 40)
+	);
+}
 void renderMap() {
 	for (int r = 0; r < MAP_NUM_ROWS; r++) {
 		for (int c = 0; c < MAP_NUM_COLS; c++) {
@@ -136,7 +153,7 @@ void render() {
 	// render all game objects for the current frame
 	renderMap();
 	//renderRays();
-	//renderPlayer();
+	renderPlayer();
 
 	SDL_RenderPresent(renderer);
 }
