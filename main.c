@@ -85,6 +85,17 @@ void setup() {
 	player.walkSpeed = 100;
 	player.turnSpeed = 45 * (PI / 180);
 }
+
+int mapHasWallAt(float x, float y) {
+	if (x < 0 || x > WINDOW_WIDTH || y < 0 || y > WINDOW_HEIGHT) {
+		return TRUE;
+	}
+	int mapGridIndexX = floor(x / TILE_SIZE);
+	int mapGridIndexY = floor(y / TILE_SIZE);
+
+	return map[mapGridIndexY][mapGridIndexX] != 0;
+}
+
 void movePlayer(float perSecond) {
 	player.rotationAngle += player.turnDirection * player.turnSpeed * perSecond;
 	float moveStep = player.walkDirection * player.walkSpeed * perSecond;
@@ -93,9 +104,10 @@ void movePlayer(float perSecond) {
 	float newPlayerY = player.y + sin(player.rotationAngle) * moveStep;
 	//TODO:
 	//perform wall collision
-
-	player.x = newPlayerX;
-	player.y = newPlayerY;
+	if (!mapHasWallAt(newPlayerX, newPlayerY)) {
+		player.x = newPlayerX;
+		player.y = newPlayerY;
+	}
 }
 void renderPlayer() {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
