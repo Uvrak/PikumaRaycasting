@@ -2,6 +2,34 @@
 #include <SDL.h>
 #include "constants.h"
 
+const int map[MAP_NUM_ROWS][MAP_NUM_COLS] = {
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
+};
+
+struct Player {
+	float x;
+	float y;
+	float width;
+	float height;
+	int turnDirection; // -1 for left, +1 for right
+	int walkDirection; // -1 for back, +1 for forward
+	float rotationAngle;
+	float walkSpeed;
+	float turnSpeed;
+} player;
+
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL; 
 
@@ -47,8 +75,34 @@ void destroyWindow() {
 void setup() {
 	// TODO:
 	// initialize and setup game objects
+	player.x = WINDOW_WIDTH / 2;
+	player.y = WINDOW_HEIGHT / 2;
+	player.width = 5;
+	player.height = 5;
+	player.turnDirection = 0;
+	player.walkDirection = 0;
+	player.rotationAngle = PI / 2;
+	player.walkSpeed = 100;
+	player.turnSpeed = 45 * (PI / 180);
 }
+void renderMap() {
+	for (int r = 0; r < MAP_NUM_ROWS; r++) {
+		for (int c = 0; c < MAP_NUM_COLS; c++) {
+			int tileX = c * TILE_SIZE;
+			int tileY = r * TILE_SIZE;
+			int tileColor = map[r][c] != 0 ? 255 : 0;
 
+			SDL_SetRenderDrawColor(renderer, tileColor, tileColor, tileColor, 255);
+			SDL_Rect mapTileRect = {
+				tileX,
+				tileY,
+				TILE_SIZE,
+				TILE_SIZE
+			};
+			SDL_RenderFillRect(renderer, &mapTileRect);
+		}
+	}
+}
 void processInput() {
 	SDL_Event event;
 	SDL_PollEvent(&event);
@@ -80,7 +134,9 @@ void render() {
 
 	// TODO:
 	// render all game objects for the current frame
-	
+	renderMap();
+	//renderRays();
+	//renderPlayer();
 
 	SDL_RenderPresent(renderer);
 }
