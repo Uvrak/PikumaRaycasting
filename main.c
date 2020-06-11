@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 #include <SDL.h>
 #include "constants.h"
 
@@ -99,6 +100,27 @@ void setup() {
 	player.turnSpeed = 45 * (PI / 180);
 }
 
+void renderPlayer() {
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_Rect playerRect = {
+		(int)(MINIMAP_SCALE_FACTOR * player.x),
+		(int)(MINIMAP_SCALE_FACTOR * player.y),
+		(int)(MINIMAP_SCALE_FACTOR * player.width),
+		(int)(MINIMAP_SCALE_FACTOR * player.height)
+	};
+
+	SDL_RenderFillRect(renderer, &playerRect);
+
+	SDL_RenderDrawLine(
+		renderer,
+		(int)(MINIMAP_SCALE_FACTOR * player.x),
+		(int)(MINIMAP_SCALE_FACTOR * player.y),
+		(int)(MINIMAP_SCALE_FACTOR * player.x + cosf(player.rotationAngle) * 40),
+		(int)(MINIMAP_SCALE_FACTOR * player.y + sinf(player.rotationAngle) * 40)
+		);
+
+}
+
 int mapHasWallAt(float x, float y) {
 	if (x < 0 || x > WINDOW_WIDTH || y < 0 || y > WINDOW_HEIGHT) {
 		return TRUE;
@@ -137,11 +159,11 @@ float distanceBetweenPoints(float x1, float y1, float x2, float y2) {
 
 void castRay(float rayAngle, int stripId) {
 	//TODO: All that crazy logic for horz, vert, ...
-	normalizeAngle(rayAngle);
-	int isRayFacingDown = rayAngle > 0 && rayAngle < PI;
+	rayAngle = normalizeAngle(rayAngle);
+	int isRayFacingDown = (rayAngle > 0) && (rayAngle < PI);
 	int isRayFacingUp = !isRayFacingDown;
 
-	int isRayFacingRight = rayAngle <  0.5 * PI || 1.5 * PI;
+	int isRayFacingRight = (rayAngle <  0.5 * PI) || (rayAngle > 1.5 * PI);
 	int isRayFacingLeft = !isRayFacingRight;
 
 	float xIntercept, yIntercept;
@@ -172,30 +194,30 @@ void castRay(float rayAngle, int stripId) {
 	xStep *= (isRayFacingRight && xStep < 0) ? -1 : 1;
 
 	float nextHorizontalTouchX = xIntercept;
-	float nextHorizontalTouxhY = yIntercept;
+	float nextHorizontalTouchY = yIntercept;
 
 	//Increment xStep and yStep until we find a wall
-	while (nextHorizontalTouchX >= 0 && nextHorizontalTouchX <= WINDOW_WIDTH && nextHorizontalTouxhY >= 0 && nextHorizontalTouxhY <= WINDOW_HEIGHT) {
+	while (nextHorizontalTouchX >= 0 && nextHorizontalTouchX <= WINDOW_WIDTH && nextHorizontalTouchY >= 0 && nextHorizontalTouchY <= WINDOW_HEIGHT) {
 		float xToCheck = nextHorizontalTouchX;
-		float yToCheck = nextHorizontalTouxhY + (isRayFacingUp ? -1 : 0);
+		float yToCheck = nextHorizontalTouchY + (isRayFacingUp ? -1 : 0);
 
 		if (mapHasWallAt(xToCheck, yToCheck)) {
 			horizontalWallHitX = nextHorizontalTouchX;
-			horizontalWallHitY = nextHorizontalTouxhY;
-			horizontalWallContent = map[(int)floor(yToCheck / TILE_SIZE)][(int)floor(xToCheck / TILE_SIZE)];
+			horizontalWallHitY = nextHorizontalTouchY;
+			horizontalWallContent = map[(int)floorf(yToCheck / TILE_SIZE)][(int)floorf(xToCheck / TILE_SIZE)];
 			foundHorizontalWallHit = TRUE;
 			break;
 		}
 		else {
 			nextHorizontalTouchX += xStep;
-			nextHorizontalTouxhY += yStep;
+			nextHorizontalTouchY += yStep;
 		}
 	}	
 
 	////////////////////////////////////////////////////////////
 	// Vertical RAY-GRID Intersection CODE
 	////////////////////////////////////////////////////////////
-
+    
 	int foundVerticalWallHit = FALSE;
 	float verticalWallHitX = 0;
 	float verticalWallHitY = 0;
@@ -206,44 +228,44 @@ void castRay(float rayAngle, int stripId) {
 	xIntercept += isRayFacingRight ? TILE_SIZE : 0;
 
 	//Find the y- coordinate of the closest horizontal grid intersection
-	yIntercept = player.y + (xIntercept - player.x) / tanf(rayAngle);
+	yIntercept = player.y + (xIntercept - player.x) * tanf(rayAngle);
 
 	//calculate the increment xstep and ystep
 	xStep = TILE_SIZE;
 	xStep *= isRayFacingLeft ? -1 : 1;
 
-	yStep = TILE_SIZE / tanf(rayAngle);
-	yStep *= (isRayFacingUp && xStep > 0) ? -1 : 1;
-	yStep *= (isRayFacingDown && xStep < 0) ? -1 : 1;
+	yStep = TILE_SIZE * tanf(rayAngle);
+	yStep *= (isRayFacingUp && yStep > 0) ? -1 : 1;
+	yStep *= (isRayFacingDown && yStep < 0) ? -1 : 1;
 
 	float nextVerticalTouchX = xIntercept;
-	float nextVerticalTouxhY = yIntercept;
+	float nextVerticalTouchY = yIntercept;
 
 	//Increment xStep and yStep until we find a wall
-	while (nextVerticalTouchX >= 0 && nextVerticalTouchX <= WINDOW_WIDTH && nextVerticalTouxhY >= 0 && nextVerticalTouxhY <= WINDOW_HEIGHT) {
+	while (nextVerticalTouchX >= 0 && nextVerticalTouchX <= WINDOW_WIDTH && nextVerticalTouchY >= 0 && nextVerticalTouchY <= WINDOW_HEIGHT) {
 		float xToCheck = nextVerticalTouchX + (isRayFacingLeft ? -1 : 0);
-		float yToCheck = nextVerticalTouxhY;
+		float yToCheck = nextVerticalTouchY;
 
 		if (mapHasWallAt(xToCheck, yToCheck)) {
 			verticalWallHitX = nextVerticalTouchX ;
-			verticalWallHitY = nextVerticalTouxhY;
+			verticalWallHitY = nextVerticalTouchY;
 			verticalWallContent = map[(int)floor(yToCheck / TILE_SIZE)][(int)floor(xToCheck / TILE_SIZE)];
 			foundVerticalWallHit = TRUE;
 			break;
 		}
 		else {
 			nextVerticalTouchX += xStep;
-			nextVerticalTouxhY += yStep;
+			nextVerticalTouchY += yStep;
 		}
 	}
 
 	// Calculate both horizontal and vertica hit distances and chose the smallest one;
 	float horizontalHitDistance = foundHorizontalWallHit 
 		? distanceBetweenPoints(player.x, player.y, horizontalWallHitX, horizontalWallHitY) 
-		: _CRT_INT_MAX;
+		: INT_MAX;
 	float verticalHitDistance = foundVerticalWallHit
 		? distanceBetweenPoints(player.x, player.y, verticalWallHitX, verticalWallHitY)
-		: _CRT_INT_MAX;
+		: INT_MAX;
 
 	if (verticalHitDistance < horizontalHitDistance) {
 		rays[stripId].distance = verticalHitDistance;
@@ -265,7 +287,6 @@ void castRay(float rayAngle, int stripId) {
 	rays[stripId].isRayFacingUp = isRayFacingUp;
 	rays[stripId].isRayFacingLeft = isRayFacingLeft;
 	rays[stripId].isRayFacingRight = isRayFacingRight;
-
 
 }
 
@@ -296,6 +317,19 @@ void renderMap() {
 			SDL_RenderFillRect(renderer, &mapTileRect);
 		}
 	}
+}
+
+void renderRays() {
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	for (int r = 0; r < NUM_RAYS; r++) {
+		SDL_RenderDrawLine(
+			renderer,
+			(int)(MINIMAP_SCALE_FACTOR * player.x),
+			(int)(MINIMAP_SCALE_FACTOR * player.y),
+			(int)(MINIMAP_SCALE_FACTOR * rays[r].wallHitX),
+			(int)(MINIMAP_SCALE_FACTOR * rays[r].wallHitY)
+		);
+	};
 }
 
 void processInput() {
@@ -362,8 +396,8 @@ void render() {
 	// TODO:
 	// render all game objects for the current frame
 	renderMap();
-	//renderRays();
-	//renderPlayer();
+	renderRays();
+	renderPlayer();
 
 	SDL_RenderPresent(renderer);
 }
