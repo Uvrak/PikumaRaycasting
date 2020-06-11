@@ -39,7 +39,9 @@ struct Ray {
 	int isRayFacingLeft;
 	int isRayFacingRight;
 	int wallHitContent;
-} rays[NUM_RAYS];
+} rays[NUM_RAYS]
+
+;
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL; 
@@ -120,23 +122,21 @@ void movePlayer(float perSecond) {
 		player.y = newPlayerY;
 	}
 }
-void renderPlayer() {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_Rect playerRect = {
-		(int)(player.x * MINIMAP_SCALE_FACTOR),
-		(int)(player.y * MINIMAP_SCALE_FACTOR),
-		(int)(player.width * MINIMAP_SCALE_FACTOR),
-		(int)(player.height * MINIMAP_SCALE_FACTOR)
-	};
-	SDL_RenderFillRect(renderer, &playerRect);
-	SDL_RenderDrawLine(
-		renderer,
-		(int)(MINIMAP_SCALE_FACTOR * player.x),
-		(int)(MINIMAP_SCALE_FACTOR * player.y),
-		(int)(MINIMAP_SCALE_FACTOR * player.x + cos(player.rotationAngle) * 40),
-		(int)(MINIMAP_SCALE_FACTOR * player.y + sin(player.rotationAngle) * 40)
-	);
+
+void castRay(float rayAngle, int stripId) {
+	//TODO: All that crazy logic for horz, vert, ...
 }
+
+void castAllRays() {
+	// start first ray substracting half of our FOV
+	float rayAngle = player.rotationAngle - (FOV_ANGLE / 2);
+
+	for (int stripId = 0; stripId < NUM_RAYS; stripId++) {
+		castRay(rayAngle, stripId);
+		rayAngle += FOV_ANGLE / NUM_RAYS;
+	}
+}
+
 void renderMap() {
 	for (int r = 0; r < MAP_NUM_ROWS; r++) {
 		for (int c = 0; c < MAP_NUM_COLS; c++) {
@@ -155,6 +155,7 @@ void renderMap() {
 		}
 	}
 }
+
 void processInput() {
 	SDL_Event event;
 	SDL_PollEvent(&event);
