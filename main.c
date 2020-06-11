@@ -85,6 +85,18 @@ void setup() {
 	player.walkSpeed = 100;
 	player.turnSpeed = 45 * (PI / 180);
 }
+void movePlayer(float perSecond) {
+	player.rotationAngle += player.turnDirection * player.turnSpeed * perSecond;
+	float moveStep = player.walkDirection * player.walkSpeed * perSecond;
+
+	float newPlayerX = player.x + cos(player.rotationAngle) * moveStep;
+	float newPlayerY = player.y + sin(player.rotationAngle) * moveStep;
+	//TODO:
+	//perform wall collision
+
+	player.x = newPlayerX;
+	player.y = newPlayerY;
+}
 void renderPlayer() {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_Rect playerRect = {
@@ -132,6 +144,35 @@ void processInput() {
 			if (event.key.keysym.sym == SDLK_ESCAPE) {
 				isGameRunning = FALSE;
 			}
+			if (event.key.keysym.sym == SDLK_UP) {
+				player.walkDirection = +1;
+			}
+			if (event.key.keysym.sym == SDLK_DOWN) {
+				player.walkDirection = -1;
+			}
+			if (event.key.keysym.sym == SDLK_LEFT) {
+				player.turnDirection = -1;
+			}
+			if (event.key.keysym.sym == SDLK_RIGHT) {
+				player.turnDirection = +1;
+			}
+
+			break;
+		}
+		case SDL_KEYUP: {
+			if (event.key.keysym.sym == SDLK_UP) {
+				player.walkDirection = 0;
+			}
+			if (event.key.keysym.sym == SDLK_DOWN) {
+				player.walkDirection = 0;
+			}
+			if (event.key.keysym.sym == SDLK_LEFT) {
+				player.turnDirection = 0;
+			}
+			if (event.key.keysym.sym == SDLK_RIGHT) {
+				player.turnDirection = 0;
+			}
+			
 			break;
 		}
 	}
@@ -144,6 +185,7 @@ void update() {
 	ticksLastFrame = SDL_GetTicks();
 	
 	//TODO: remember to update game objject as a function of perSecond
+	movePlayer(perSecond);
 }
 void render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
