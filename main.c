@@ -29,6 +29,17 @@ struct Player {
 	float walkSpeed;
 	float turnSpeed;
 } player;
+struct Ray {
+	float rayAngle;
+	float wallHitX;
+	float wallHitY;
+	float distance;
+	int isRayFacingUp;
+	int isRayFacingDown;
+	int isRayFacingLeft;
+	int isRayFacingRight;
+	int wallHitContent;
+} rays[NUM_RAYS];
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL; 
@@ -198,6 +209,7 @@ void update() {
 	
 	//TODO: remember to update game objject as a function of perSecond
 	movePlayer(perSecond);
+	castAllRays();
 }
 void render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
