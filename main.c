@@ -405,9 +405,9 @@ void update() {
 
 void generate3DProjection() {
 	for (int i = 0; i < NUM_RAYS; i++) {
-
+		float perpDistance = rays[i].distance * cosf(rays[i].rayAngle - player.rotationAngle);
 		float distanceProjectionPlane = (WINDOW_WIDTH / 2) / tanf(FOV_ANGLE / 2);
-		float projectedWallHeight = (TILE_SIZE / rays[i].distance) * distanceProjectionPlane;
+		float projectedWallHeight = (TILE_SIZE / perpDistance) * distanceProjectionPlane;
 
 		int wallStripHeight = (int)projectedWallHeight;
 		int wallTopPixel = (WINDOW_HEIGHT / 2) - (wallStripHeight / 2);
@@ -415,9 +415,19 @@ void generate3DProjection() {
 		int wallBottomPixel = (WINDOW_HEIGHT / 2) + (wallStripHeight / 2);
 		wallBottomPixel = wallBottomPixel > WINDOW_HEIGHT ? WINDOW_HEIGHT : wallBottomPixel;
 
+
 		//TODO: render the wall from wallTopPixel to WallBottomPixel
+		for (int y = 0; y < wallTopPixel; y++) {
+		
+			colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFF333333;
+		}
 		for (int y = wallTopPixel; y < wallBottomPixel; y++) {
-			colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFFFFFFFF;
+			colorBuffer[(WINDOW_WIDTH * y) + i] = rays[i].wasHitVertical ? 0xFFFFFFFF : 0xFFCCCCCC ;
+		}
+
+		for (int y = wallBottomPixel; y < WINDOW_HEIGHT; y++) {
+
+			colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFF777777;
 		}
 
 
@@ -455,7 +465,7 @@ void render() {
 
 	generate3DProjection();
 	renderColorBuffer();
-	clearColorBuffer(0xFFFF0000);
+	clearColorBuffer(0xFF000000);
 	// TODO:
 	// render all game objects for the current frame
 	renderMap();
