@@ -422,7 +422,12 @@ void generate3DProjection() {
 			colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFF333333;
 		}
 		for (int y = wallTopPixel; y < wallBottomPixel; y++) {
-			colorBuffer[(WINDOW_WIDTH * y) + i] = rays[i].wasHitVertical ? 0xFFFFFFFF : 0xFFCCCCCC ;
+			if (y == wallTopPixel || y == wallBottomPixel - 1) {
+				colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFFFF0000;
+			}
+			else {
+				colorBuffer[(WINDOW_WIDTH * y) + i] = rays[i].wasHitVertical ? 0xFFFFFFFF : 0xFFCCCCCC;
+			}
 		}
 
 		for (int y = wallBottomPixel; y < WINDOW_HEIGHT; y++) {
