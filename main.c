@@ -46,10 +46,11 @@ struct Ray {
 
 SDL_Window* window = NULL;
 SDL_Renderer* renderer = NULL; 
-
 int isGameRunning = FALSE;
-
 int ticksLastFrame;
+
+Uint32* colorBuffer = NULL;
+SDL_Texture* colorBufferTexture;
 
 int initializeWindow() {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -98,6 +99,18 @@ void setup() {
 	player.rotationAngle = PI / 2;
 	player.walkSpeed = 100;
 	player.turnSpeed = 45 * (PI / 180);
+
+	//allocate the total amount of bytes in memory to hold our colorbuffer
+	colorBuffer = malloc(sizeof(Uint32) * (Uint32)WINDOW_WIDTH * (Uint32)WINDOW_HEIGHT);
+
+	// create an SDL_Texture to display the colorBuffer
+	colorBufferTexture = SDL_CreateTexture(
+		renderer,
+		SDL_PIXELFORMAT_ARGB8888,
+		SDL_TEXTUREACCESS_STREAMING,
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT
+	);
 }
 
 void renderPlayer() {
@@ -389,10 +402,37 @@ void update() {
 	castAllRays();
 }
 
+void clearColorBuffer(Uint32 color) {
+	for (int x = 0; x < WINDOW_WIDTH; x++) {
+		for (int y = 0; y < WINDOW_HEIGHT; y++) {
+			colorBuffer[(WINDOW_WIDTH * y) + x] = color;
+		}
+	}
+}
+
+void renderColorBuffer() {
+	SDL_UpdateTexture(
+		colorBufferTexture,
+		NULL,
+		colorBuffer,
+		(int)((Uint32)WINDOW_WIDTH * sizeof(Uint32))
+	);
+
+	SDL_RenderCopy(
+		renderer,
+		colorBufferTexture,
+		NULL,
+		NULL
+	);
+};
+
 void render() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
+	// clear the color buffer
 
+	renderColorBuffer();
+	clearColorBuffer(0xFFFF0000);
 	// TODO:
 	// render all game objects for the current frame
 	renderMap();
