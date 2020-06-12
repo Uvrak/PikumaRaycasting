@@ -7,12 +7,12 @@ const int map[MAP_NUM_ROWS][MAP_NUM_COLS] = {
 	{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-	{1,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,0,1},
+	{1,0,0,0,1,0,2,0,3,0,4,0,5,0,6,0,7,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
-	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1},
-	{1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,1},
+	{1,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,2,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
 	{1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -82,6 +82,7 @@ int initializeWindow() {
 }
 
 void destroyWindow() {
+	free(colorBuffer);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
@@ -402,6 +403,27 @@ void update() {
 	castAllRays();
 }
 
+void generate3DProjection() {
+	for (int i = 0; i < NUM_RAYS; i++) {
+
+		float distanceProjectionPlane = (WINDOW_WIDTH / 2) / tanf(FOV_ANGLE / 2);
+		float projectedWallHeight = (TILE_SIZE / rays[i].distance) * distanceProjectionPlane;
+
+		int wallStripHeight = (int)projectedWallHeight;
+		int wallTopPixel = (WINDOW_HEIGHT / 2) - (wallStripHeight / 2);
+		wallTopPixel = wallTopPixel < 0 ? 0 : wallTopPixel;
+		int wallBottomPixel = (WINDOW_HEIGHT / 2) + (wallStripHeight / 2);
+		wallBottomPixel = wallBottomPixel > WINDOW_HEIGHT ? WINDOW_HEIGHT : wallBottomPixel;
+
+		//TODO: render the wall from wallTopPixel to WallBottomPixel
+		for (int y = wallTopPixel; y < wallBottomPixel; y++) {
+			colorBuffer[(WINDOW_WIDTH * y) + i] = 0xFFFFFFFF;
+		}
+
+
+	}
+}
+
 void clearColorBuffer(Uint32 color) {
 	for (int x = 0; x < WINDOW_WIDTH; x++) {
 		for (int y = 0; y < WINDOW_HEIGHT; y++) {
@@ -431,6 +453,7 @@ void render() {
 	SDL_RenderClear(renderer);
 	// clear the color buffer
 
+	generate3DProjection();
 	renderColorBuffer();
 	clearColorBuffer(0xFFFF0000);
 	// TODO:
